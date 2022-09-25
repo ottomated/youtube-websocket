@@ -1,0 +1,14 @@
+{
+	"root": true,
+	"parser": "@typescript-eslint/parser",
+	"plugins": [
+		"@typescript-eslint",
+		"neverthrow"
+	],
+	"extends": [
+		"eslint:recommended",
+		"plugin:prettier/recommended",
+		"plugin:@typescript-eslint/recommended"
+	],
+	"ignorePatterns": "dist"
+}

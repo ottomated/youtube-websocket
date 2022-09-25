@@ -1,0 +1,10 @@
+name = "youtube-websocket"
+main = "src/index.ts"
+compatibility_date = "2022-09-24"
+
+[durable_objects]
+bindings = [{ name = "YOUTUBE_CHAT", class_name = "YoutubeChat" }]
+
+[[migrations]]
+tag = "v1"
+new_classes = ["YoutubeChat"]
