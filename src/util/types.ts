@@ -1,3 +1,6 @@
+import { Env } from '..';
+import { Result } from './util';
+
 export type Continuation<T extends string = string> = {
 	[key in T]: {
 		continuation: string;
@@ -145,3 +148,7 @@ export type LiveChatAction<Action extends string = string> = {
 } & {
 	clickTrackingParams: string;
 };
+
+export type Handler<T extends Record<string, string> = Record<string, string>> =
+	(request: Request & { params: T }, env: Env) => Promise<HandlerResult>;
+export type HandlerResult = Result<Response, [string, number]>;

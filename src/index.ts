@@ -1,7 +1,8 @@
 import { IHTTPMethods, Router } from 'itty-router';
 import { getChannel } from './routes/channel';
 import { getStream } from './routes/stream';
-import { notFound, Result } from './util/util';
+import { HandlerResult } from './util/types';
+import { notFound } from './util/util';
 export { YoutubeChat } from './YoutubeChat';
 
 export interface Env {
@@ -41,9 +42,5 @@ const handler: ExportedHandler<Env> = {
 		}
 	},
 };
-
-export type Handler<T extends Record<string, string> = Record<string, string>> =
-	(request: Request & { params: T }, env: Env) => Promise<HandlerResult>;
-type HandlerResult = Result<Response, [string, number]>;
 
 export default handler;
