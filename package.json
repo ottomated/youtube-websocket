@@ -2,7 +2,7 @@
 	"name": "youtube-websocket",
 	"version": "0.0.0",
 	"scripts": {
-		"dev": "wrangler dev --local",
+		"dev": "MINIFLARE_SUBREQUEST_LIMIT=99999 wrangler dev --local",
 		"deploy": "wrangler publish",
 		"lint": "eslint src --fix"
 	},
@@ -12,15 +12,15 @@
 	},
 	"devDependencies": {
 		"@cloudflare/workers-types": "^3.16.0",
-		"@typescript-eslint/eslint-plugin": "^5.38.0",
-		"@typescript-eslint/parser": "^5.38.0",
+		"@typescript-eslint/eslint-plugin": "^5.38.1",
+		"@typescript-eslint/parser": "^5.38.1",
 		"eslint": "^8.24.0",
 		"eslint-config-prettier": "^8.5.0",
 		"eslint-plugin-neverthrow": "^1.1.4",
 		"eslint-plugin-prettier": "^4.2.1",
 		"prettier": "^2.7.1",
-		"typescript": "^4.8.3",
-		"wrangler": "2.1.6"
+		"typescript": "^4.8.4",
+		"wrangler": "2.1.9"
 	},
 	"private": true,
 	"packageManager": "yarn@3.2.3"
