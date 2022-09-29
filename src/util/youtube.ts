@@ -1,4 +1,4 @@
-import { err, ok, Result } from 'neverthrow';
+import { Err, err, Ok, ok, Result } from 'neverthrow';
 import {
 	ChatItemRenderer,
 	Continuation,
@@ -10,14 +10,17 @@ import { Json, JsonObject, youtubeHeaders } from './util';
 
 export type VideoData = {
 	initialData: Json;
-	config: {
-		INNERTUBE_API_KEY: string;
-		INNERTUBE_CONTEXT: Json;
-	} & JsonObject;
+	config: YTConfig;
 };
+
+export type YTConfig = {
+	INNERTUBE_API_KEY: string;
+	INNERTUBE_CONTEXT: Json;
+} & JsonObject;
+
 export async function getVideoData(
 	urls: string[]
-): Promise<Result<VideoData, [string, number]>> {
+): Promise<Ok<VideoData, unknown> | Err<unknown, [string, number]>> {
 	let response: Response | undefined;
 	for (const url of urls) {
 		response = await fetch(url, {
@@ -40,7 +43,7 @@ export async function getVideoData(
 		/(?:window\s*\[\s*["']ytInitialData["']\s*\]|ytInitialData)\s*=\s*({.+?})\s*;/
 	);
 	if (initialData.isErr()) return initialData;
-	const config = getMatch(text, /(?:ytcfg.set)\(({[\s\S]+?})\)\s*;/);
+	const config = getMatch<YTConfig>(text, /(?:ytcfg.set)\(({[\s\S]+?})\)\s*;/);
 	if (config.isErr()) return config;
 
 	if (!config.value.INNERTUBE_API_KEY || !config.value.INNERTUBE_CONTEXT)
@@ -49,11 +52,10 @@ export async function getVideoData(
 	return ok({ initialData: initialData.value, config: config.value });
 }
 
-function getMatch(
+function getMatch<T extends Json = Json>(
 	html: string,
 	pattern: RegExp
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-): Result<any, [string, number]> {
+): Result<T, [string, number]> {
 	const match = pattern.exec(html);
 	if (!match?.[1]) return err(['Failed to find video data', 404]);
 	try {

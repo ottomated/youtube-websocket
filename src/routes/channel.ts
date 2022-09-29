@@ -4,7 +4,7 @@ import { notFound, traverseJSON } from '../util/util';
 import { getVideoData } from '../util/youtube';
 import { createChatObject } from '../YoutubeChat';
 
-export const getChannel: Handler = async (request, env) => {
+export const getChannel: Handler<{ id: string }> = async (request, env) => {
 	if (!request.params.id) return notFound;
 
 	const urls = getChannelLiveUrl(request.params.id);

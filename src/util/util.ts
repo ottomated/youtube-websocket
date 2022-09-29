@@ -32,5 +32,5 @@ export type JsonObject = {
 };
 
 export function isObject(obj: unknown): obj is JsonObject {
-	return typeof obj === 'object' && obj !== null && !Array.isArray(obj);
+	return typeof obj === 'object' && !Array.isArray(obj);
 }

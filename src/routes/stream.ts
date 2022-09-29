@@ -4,7 +4,7 @@ import { notFound } from '../util/util';
 import { getVideoData } from '../util/youtube';
 import { createChatObject } from '../YoutubeChat';
 
-export const getStream: Handler = async (request, env) => {
+export const getStream: Handler<{ id: string }> = async (request, env) => {
 	if (!request.params.id) return notFound;
 
 	if (!/[A-Za-z0-9_-]{11}/.test(request.params.id)) return notFound;
