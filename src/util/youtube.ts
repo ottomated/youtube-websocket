@@ -1,4 +1,4 @@
-import { Err, err, Ok, ok, Result } from 'neverthrow';
+import { Err, err, Ok, ok } from 'neverthrow';
 import {
 	ChatItemRenderer,
 	Continuation,
@@ -6,7 +6,7 @@ import {
 	LiveChatAction,
 	YTString,
 } from './types';
-import { Json, JsonObject, youtubeHeaders } from './util';
+import { Json, JsonObject, Result, youtubeHeaders } from './util';
 
 export type VideoData = {
 	initialData: Json;

@@ -1,4 +1,4 @@
-import { err } from 'neverthrow';
+import { Err, err, Ok } from 'neverthrow';
 
 export const notFound = err<never, [string, number]>(['Not Found', 404]);
 
@@ -23,6 +23,8 @@ export function traverseJSON<T>(
 		}
 	}
 }
+
+export type Result<T, E> = Ok<T, unknown> | Err<unknown, E>;
 
 export type Json = JsonPrimitive | JsonArray | JsonObject;
 type JsonPrimitive = null | boolean | number | string;
