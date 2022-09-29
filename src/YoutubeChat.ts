@@ -19,13 +19,13 @@ export async function createChatObject(
 	const id = env.YOUTUBE_CHAT.idFromName(videoId);
 	const object = env.YOUTUBE_CHAT.get(id);
 
-	const init = await object.fetch('http://internal.do/init', {
+	const init = await object.fetch('http://youtube.chat/init', {
 		method: 'POST',
 		body: JSON.stringify(videoData),
 	});
 	if (!init.ok) return init;
 
-	return object.fetch('http://internal.do/ws', req);
+	return object.fetch('http://youtube.chat/ws', req);
 }
 
 const chatInterval = 250;
@@ -65,11 +65,20 @@ export class YoutubeChat implements DurableObject {
 			}
 		});
 
-		if (!continuation)
-			return new Response('Failed to load chat', { status: 404 });
+		if (!continuation) {
+			this.initialized = false;
+			return new Response('Failed to load chat', {
+				status: 404,
+			});
+		}
 
 		const token = getContinuationToken(continuation);
-		if (!token) return new Response('Failed to load chat', { status: 404 });
+		if (!token) {
+			this.initialized = false;
+			return new Response('Failed to load chat', {
+				status: 404,
+			});
+		}
 
 		this.fetchChat(token);
 		setInterval(() => this.clearSeenMessages(), 60 * 1000);
