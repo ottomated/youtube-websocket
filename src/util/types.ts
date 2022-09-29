@@ -1,5 +1,5 @@
+import type { Err, Ok } from 'neverthrow';
 import { Env } from '..';
-import { Result } from './util';
 
 export type Continuation<T extends string = string> = {
 	[key in T]: {
@@ -152,3 +152,12 @@ export type LiveChatAction<Action extends string = string> = {
 export type Handler<T extends Record<string, string> = Record<string, string>> =
 	(request: Request & { params: T }, env: Env) => Promise<HandlerResult>;
 export type HandlerResult = Result<Response, [string, number]>;
+
+export type Result<T, E> = Ok<T, unknown> | Err<unknown, E>;
+
+export type Json = JsonPrimitive | JsonArray | JsonObject;
+type JsonPrimitive = null | boolean | number | string;
+type JsonArray = Json[];
+export type JsonObject = {
+	[key: string]: Json;
+};

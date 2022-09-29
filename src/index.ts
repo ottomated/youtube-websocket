@@ -1,8 +1,8 @@
 import { IHTTPMethods, Router } from 'itty-router';
 import { getChannel } from './routes/channel';
 import { getStream } from './routes/stream';
-import { HandlerResult } from './util/types';
-import { notFound } from './util/util';
+import { HandlerResult } from '@util/types';
+import { notFound } from '@util/util';
 export { YoutubeChat } from './YoutubeChat';
 
 export interface Env {

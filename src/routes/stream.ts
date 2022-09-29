@@ -1,7 +1,7 @@
 import { ok } from 'neverthrow';
-import { Handler } from '..';
-import { notFound } from '../util/util';
-import { getVideoData } from '../util/youtube';
+import { Handler } from '@util/types';
+import { notFound } from '@util/util';
+import { getVideoData } from '@util/youtube';
 import { createChatObject } from '../YoutubeChat';
 
 export const getStream: Handler<{ id: string }> = async (request, env) => {

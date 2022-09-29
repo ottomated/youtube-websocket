@@ -1,4 +1,5 @@
-import { Err, err, Ok } from 'neverthrow';
+import { err } from 'neverthrow';
+import { Json, JsonObject } from './types';
 
 export const notFound = err<never, [string, number]>(['Not Found', 404]);
 
@@ -23,15 +24,6 @@ export function traverseJSON<T>(
 		}
 	}
 }
-
-export type Result<T, E> = Ok<T, unknown> | Err<unknown, E>;
-
-export type Json = JsonPrimitive | JsonArray | JsonObject;
-type JsonPrimitive = null | boolean | number | string;
-type JsonArray = Json[];
-export type JsonObject = {
-	[key: string]: Json;
-};
 
 export function isObject(obj: unknown): obj is JsonObject {
 	return typeof obj === 'object' && !Array.isArray(obj);

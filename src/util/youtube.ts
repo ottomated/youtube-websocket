@@ -3,10 +3,13 @@ import {
 	ChatItemRenderer,
 	Continuation,
 	isTextRun,
+	Json,
+	JsonObject,
 	LiveChatAction,
+	Result,
 	YTString,
 } from './types';
-import { Json, JsonObject, Result, youtubeHeaders } from './util';
+import { youtubeHeaders } from './util';
 
 export type VideoData = {
 	initialData: Json;

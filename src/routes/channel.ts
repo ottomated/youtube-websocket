@@ -1,7 +1,7 @@
 import { err, ok } from 'neverthrow';
-import { Handler } from '..';
-import { notFound, traverseJSON } from '../util/util';
-import { getVideoData } from '../util/youtube';
+import { Handler } from '@util/types';
+import { notFound, traverseJSON } from '@util/util';
+import { getVideoData } from '@util/youtube';
 import { createChatObject } from '../YoutubeChat';
 
 export const getChannel: Handler<{ id: string }> = async (request, env) => {

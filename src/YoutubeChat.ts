@@ -1,12 +1,12 @@
 import { IHTTPMethods, Router } from 'itty-router';
 import { Env } from '.';
-import { Continuation, LiveChatResponse } from './util/types';
-import { traverseJSON } from './util/util';
+import { Continuation, LiveChatResponse } from '@util/types';
+import { traverseJSON } from '@util/util';
 import {
 	getContinuationToken,
 	parseChatAction,
 	VideoData,
-} from './util/youtube';
+} from '@util/youtube';
 
 type Handler = (request: Request) => Promise<Response>;
 

@@ -8,7 +8,8 @@
 	},
 	"dependencies": {
 		"itty-router": "^2.6.5",
-		"neverthrow": "^5.0.0"
+		"neverthrow": "^5.0.0",
+		"youtubei.js": "^2.2.3"
 	},
 	"devDependencies": {
 		"@cloudflare/workers-types": "^3.16.0",
