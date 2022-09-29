@@ -31,7 +31,6 @@ export async function createChatObject(
 const chatInterval = 250;
 
 export class YoutubeChat implements DurableObject {
-	private initialized = false;
 	private router: Router<Request, IHTTPMethods>;
 	private initialData!: VideoData['initialData'];
 	private config!: VideoData['config'];
@@ -53,37 +52,40 @@ export class YoutubeChat implements DurableObject {
 		}
 	}
 
-	private init: Handler = async (req) => {
-		if (this.initialized) return new Response();
-		this.initialized = true;
-		const data = await req.json<VideoData>();
-		this.config = data.config;
-		this.initialData = data.initialData;
-		const continuation = traverseJSON(data.initialData, (value) => {
-			if (value.title === 'Live chat') {
-				return value.continuation as Continuation;
+	private initialized = false;
+	private init: Handler = (req) => {
+		return this.state.blockConcurrencyWhile(async () => {
+			if (this.initialized) return new Response();
+			this.initialized = true;
+			const data = await req.json<VideoData>();
+			this.config = data.config;
+			this.initialData = data.initialData;
+			const continuation = traverseJSON(data.initialData, (value) => {
+				if (value.title === 'Live chat') {
+					return value.continuation as Continuation;
+				}
+			});
+
+			if (!continuation) {
+				this.initialized = false;
+				return new Response('Failed to load chat', {
+					status: 404,
+				});
 			}
+
+			const token = getContinuationToken(continuation);
+			if (!token) {
+				this.initialized = false;
+				return new Response('Failed to load chat', {
+					status: 404,
+				});
+			}
+
+			this.fetchChat(token);
+			setInterval(() => this.clearSeenMessages(), 60 * 1000);
+
+			return new Response();
 		});
-
-		if (!continuation) {
-			this.initialized = false;
-			return new Response('Failed to load chat', {
-				status: 404,
-			});
-		}
-
-		const token = getContinuationToken(continuation);
-		if (!token) {
-			this.initialized = false;
-			return new Response('Failed to load chat', {
-				status: 404,
-			});
-		}
-
-		this.fetchChat(token);
-		setInterval(() => this.clearSeenMessages(), 60 * 1000);
-
-		return new Response();
 	};
 
 	private nextContinuationToken?: string;
