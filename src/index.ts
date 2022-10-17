@@ -7,6 +7,9 @@ export { YoutubeChat } from './YoutubeChat';
 
 export interface Env {
 	YOUTUBE_CHAT: DurableObjectNamespace;
+
+	// Variables
+	TRUFFLE_API_BASE: string;
 }
 
 function route(request: Request, env: Env): Promise<HandlerResult> {

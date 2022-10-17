@@ -1,11 +1,9 @@
 import { Err, err, Ok, ok } from 'neverthrow';
 import {
-	ChatItemRenderer,
 	Continuation,
 	isTextRun,
 	Json,
 	JsonObject,
-	LiveChatAction,
 	Result,
 	YTString,
 } from './types';
@@ -20,7 +18,6 @@ export type YTConfig = {
 	INNERTUBE_API_KEY: string;
 	INNERTUBE_CONTEXT: Json;
 } & JsonObject;
-
 export async function getVideoData(
 	urls: string[]
 ): Promise<Ok<VideoData, unknown> | Err<unknown, [string, number]>> {
@@ -71,54 +68,6 @@ function getMatch<T extends Json = Json>(
 export function getContinuationToken(continuation: Continuation) {
 	const key = Object.keys(continuation)[0] as keyof Continuation;
 	return continuation[key]?.continuation;
-}
-
-type ChatEvent = {
-	type: 'message';
-	id: string;
-	message: string;
-	author: {
-		name: string;
-		id: string;
-		badges: {
-			tooltip: string;
-			type: 'icon' | 'custom';
-			badge: string;
-		}[];
-	};
-	unix: number;
-};
-
-export function parseChatAction(data: LiveChatAction): ChatEvent | undefined {
-	const actionType = Object.keys(data)[0] as keyof LiveChatAction;
-	const action = data[actionType]?.item;
-	if (!action) return;
-	const rendererType = Object.keys(action)[0] as keyof ChatItemRenderer;
-	switch (rendererType) {
-		case 'liveChatTextMessageRenderer': {
-			const renderer = action[rendererType];
-			return {
-				type: 'message',
-				message: parseYTString(renderer.message),
-				id: renderer.id,
-				author: {
-					id: renderer.authorExternalChannelId,
-					name: parseYTString(renderer.authorName),
-					badges:
-						renderer.authorBadges?.map(
-							({ liveChatAuthorBadgeRenderer: badge }) => ({
-								tooltip: badge.tooltip,
-								type: badge.icon ? 'icon' : 'custom',
-								badge: badge.icon
-									? badge.icon.iconType
-									: badge.customThumbnail?.thumbnails?.[0]?.url ?? '',
-							})
-						) ?? [],
-				},
-				unix: Math.round(Number(renderer.timestampUsec) / 1000),
-			};
-		}
-	}
 }
 
 export function parseYTString(string: YTString): string {

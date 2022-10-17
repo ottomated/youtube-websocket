@@ -1,6 +1,6 @@
 import { WebSocket } from 'ws';
 
-const ws = new WebSocket('ws://localhost:8787/v/vmS9vNbtssw');
+const ws = new WebSocket('ws://localhost:8787/c/Myth_YT?adapter=truffle');
 
 ws.addEventListener('error', (ev) => {
 	console.log(ev.message);

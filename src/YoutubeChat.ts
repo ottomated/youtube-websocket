@@ -1,12 +1,23 @@
 import { IHTTPMethods, Router } from 'itty-router';
 import { Env } from '.';
-import { Continuation, LiveChatResponse } from '@util/types';
+import { Continuation, LiveChatAction, LiveChatResponse } from '@util/types';
 import { traverseJSON } from '@util/util';
-import {
-	getContinuationToken,
-	parseChatAction,
-	VideoData,
-} from '@util/youtube';
+import { getContinuationToken, VideoData } from '@util/youtube';
+import { MessageAdapter } from './adapters';
+import { JSONMessageAdapter } from './adapters/json';
+import { IRCMessageAdapter } from './adapters/irc';
+import { RawMessageAdapter } from './adapters/raw';
+import { TruffleMessageAdapter } from './adapters/truffle';
+
+const adapterMap: Record<
+	string,
+	(env: Env, channelId: string) => MessageAdapter
+> = {
+	json: () => new JSONMessageAdapter(),
+	irc: () => new IRCMessageAdapter(),
+	truffle: (env, channelId) => new TruffleMessageAdapter(env, channelId),
+	raw: () => new RawMessageAdapter(),
+};
 
 type Handler = (request: Request) => Promise<Response>;
 
@@ -25,16 +36,18 @@ export async function createChatObject(
 	});
 	if (!init.ok) return init;
 
-	return object.fetch('http://youtube.chat/ws', req);
+	const url = new URL(req.url);
+
+	return object.fetch('http://youtube.chat/ws' + url.search, req);
 }
 
 const chatInterval = 250;
 
 export class YoutubeChat implements DurableObject {
 	private router: Router<Request, IHTTPMethods>;
+	private channelId!: string;
 	private initialData!: VideoData['initialData'];
 	private config!: VideoData['config'];
-	private sockets = new Set<WebSocket>();
 	private seenMessages = new Map<string, number>();
 
 	constructor(private state: DurableObjectState, private env: Env) {
@@ -45,10 +58,13 @@ export class YoutubeChat implements DurableObject {
 		r.all('*', () => new Response('Not found', { status: 404 }));
 	}
 
-	private broadcast<T>(data: T) {
-		const message = JSON.stringify(data);
-		for (const socket of this.sockets.values()) {
-			socket.send(message);
+	private broadcast(data: LiveChatAction) {
+		for (const adapter of this.adapters.values()) {
+			const transformed = adapter.transform(data);
+			if (!transformed) continue;
+			for (const socket of adapter.sockets) {
+				socket.send(transformed);
+			}
 		}
 	}
 
@@ -60,6 +76,11 @@ export class YoutubeChat implements DurableObject {
 			const data = await req.json<VideoData>();
 			this.config = data.config;
 			this.initialData = data.initialData;
+			this.channelId = traverseJSON(this.initialData, (value, key) => {
+				if (key === 'channelNavigationEndpoint') {
+					return value.browseEndpoint?.browseId;
+				}
+			});
 			const continuation = traverseJSON(data.initialData, (value) => {
 				if (value.title === 'Live chat') {
 					return value.continuation as Continuation;
@@ -129,25 +150,44 @@ export class YoutubeChat implements DurableObject {
 				data.continuationContents.liveChatContinuation.actions ?? [];
 
 			for (const action of actions) {
-				const parsed = parseChatAction(action);
-				if (parsed) {
-					if (this.seenMessages.has(parsed.id)) continue;
-					this.seenMessages.set(parsed.id, parsed.unix);
-					this.broadcast(parsed);
-				}
+				this.broadcast(action);
+
+				// const parsed = parseChatAction(action);
+				// if (parsed) {
+				// 	if (this.seenMessages.has(parsed.id)) continue;
+				// 	this.seenMessages.set(parsed.id, parsed.unix);
+				// 	this.broadcast(parsed);
+				// }
 			}
 		} catch (e) {
 			console.error(e);
 		} finally {
 			this.nextContinuationToken = nextToken;
-			if (this.sockets.size > 0)
+			if (this.adapters.size > 0)
 				setTimeout(() => this.fetchChat(nextToken), chatInterval);
 		}
+	}
+
+	private adapters = new Map<string, MessageAdapter>();
+
+	private makeAdapter(adapterType: string): MessageAdapter {
+		// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+		const adapterFactory = adapterMap[adapterType] ?? adapterMap.json!;
+
+		const cached = this.adapters.get(adapterType);
+		if (cached) return cached;
+
+		const adapter = adapterFactory(this.env, this.channelId);
+		this.adapters.set(adapterType, adapter);
+		return adapter;
 	}
 
 	private handleWebsocket: Handler = async (req) => {
 		if (req.headers.get('Upgrade') !== 'websocket')
 			return new Response('Expected a websocket', { status: 400 });
+
+		const url = new URL(req.url);
+		const adapterType = url.searchParams.get('adapter') ?? 'json';
 
 		const pair = new WebSocketPair();
 		const ws = pair[1];
@@ -158,11 +198,13 @@ export class YoutubeChat implements DurableObject {
 			webSocket: pair[0],
 		});
 
-		this.sockets.add(ws);
+		const adapter = this.makeAdapter(adapterType);
+		adapter.sockets.add(ws);
 		if (this.nextContinuationToken) this.fetchChat(this.nextContinuationToken);
 
 		ws.addEventListener('close', () => {
-			this.sockets.delete(ws);
+			adapter.sockets.delete(ws);
+			if (adapter.sockets.size === 0) this.adapters.delete(adapterType);
 		});
 
 		return wsResponse;
