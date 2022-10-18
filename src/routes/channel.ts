@@ -3,9 +3,15 @@ import { Handler } from '@util/types';
 import { notFound, traverseJSON } from '@util/util';
 import { getVideoData } from '@util/youtube';
 import { createChatObject } from '../YoutubeChat';
+// import Innertube from 'youtubei.js/dist';
 
 export const getChannel: Handler<{ id: string }> = async (request, env) => {
 	if (!request.params.id) return notFound;
+
+	// const innertube = await Innertube.create();
+	// innertube.get
+	// const chan = await innertube.getChannel(request.params.id);
+	// console.log(chan);
 
 	const urls = getChannelLiveUrl(request.params.id);
 

@@ -10,13 +10,13 @@
 	"dependencies": {
 		"itty-router": "^2.6.6",
 		"neverthrow": "^5.0.1",
-		"youtubei.js": "^2.2.3"
+		"youtubei.js": "^2.3.2"
 	},
 	"devDependencies": {
-		"@cloudflare/workers-types": "^3.16.0",
+		"@cloudflare/workers-types": "^3.17.0",
 		"@types/ws": "^8.5.3",
-		"@typescript-eslint/eslint-plugin": "^5.40.0",
-		"@typescript-eslint/parser": "^5.40.0",
+		"@typescript-eslint/eslint-plugin": "^5.40.1",
+		"@typescript-eslint/parser": "^5.40.1",
 		"eslint": "^8.25.0",
 		"eslint-config-prettier": "^8.5.0",
 		"eslint-plugin-neverthrow": "^1.1.4",
@@ -24,9 +24,12 @@
 		"prettier": "^2.7.1",
 		"ts-node": "^10.9.1",
 		"typescript": "^4.8.4",
-		"wrangler": "2.1.11",
+		"wrangler": "2.1.12",
 		"ws": "^8.9.0"
 	},
 	"private": true,
-	"packageManager": "yarn@3.2.3"
+	"packageManager": "yarn@3.2.3",
+	"resolutions": {
+		"youtubei.js@^2.3.2": "patch:youtubei.js@npm%3A2.3.2#./.yarn/patches/youtubei.js-npm-2.3.2-3338aebb89.patch"
+	}
 }
