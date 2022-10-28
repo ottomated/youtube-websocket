@@ -9,7 +9,7 @@ export type Continuation<T extends string = string> = {
 };
 
 export type LiveChatResponse = {
-	continuationContents: {
+	continuationContents?: {
 		liveChatContinuation: {
 			continuations?: Continuation[];
 			actions?: LiveChatAction[];
@@ -146,7 +146,7 @@ export type LiveChatAction<Action extends string = string> = {
 		item: ChatItemRenderer;
 	};
 } & {
-	clickTrackingParams: string;
+	clickTrackingParams?: string;
 };
 
 export type Handler<T extends Record<string, string> = Record<string, string>> =

@@ -2,21 +2,49 @@ import { ChatItemRenderer, LiveChatAction } from '@util/types';
 import { parseYTString } from '@util/youtube';
 import { MessageAdapter } from '.';
 
-export type ChatEvent = {
-	type: 'message';
-	id: string;
-	message: string;
-	author: {
-		name: string;
-		id: string;
-		badges: {
-			tooltip: string;
-			type: 'icon' | 'custom';
-			badge: string;
-		}[];
-	};
-	unix: number;
-};
+export type ChatEvent =
+	| {
+			type: 'message';
+			id: string;
+			message: string;
+			author: {
+				name: string;
+				id: string;
+				badges: {
+					tooltip: string;
+					type: 'icon' | 'custom';
+					badge: string;
+				}[];
+			};
+			unix: number;
+	  }
+	| {
+			type: 'member';
+			id: string;
+			author: {
+				id: string;
+				name: string;
+			};
+			unix: number;
+	  }
+	| {
+			type: 'superchat';
+			id: string;
+			message: string;
+			amount: {
+				// cents: number;
+				text: string;
+			};
+			author: {
+				name: string;
+				id: string;
+			};
+			unix: number;
+	  };
+
+function parseUnix(unix: string): number {
+	return Math.round(Number(unix) / 1000);
+}
 
 export class JSONMessageAdapter extends MessageAdapter {
 	public sockets = new Set<WebSocket>();
@@ -27,6 +55,7 @@ export class JSONMessageAdapter extends MessageAdapter {
 	}
 
 	protected parseAction(data: LiveChatAction): ChatEvent | undefined {
+		delete data.clickTrackingParams;
 		const actionType = Object.keys(data)[0] as keyof LiveChatAction;
 		const action = data[actionType]?.item;
 		if (!action) return;
@@ -52,9 +81,43 @@ export class JSONMessageAdapter extends MessageAdapter {
 								})
 							) ?? [],
 					},
-					unix: Math.round(Number(renderer.timestampUsec) / 1000),
+					unix: parseUnix(renderer.timestampUsec),
 				};
 			}
+			case 'liveChatMembershipItemRenderer': {
+				const renderer = action[rendererType];
+				console.log(JSON.stringify(renderer, null, 2));
+				return {
+					type: 'member',
+					id: renderer.id,
+					author: {
+						id: renderer.authorExternalChannelId,
+						name: parseYTString(renderer.authorName),
+					},
+					unix: parseUnix(renderer.timestampUsec),
+				};
+			}
+			case 'liveChatPaidMessageRenderer': {
+				const renderer = action[rendererType];
+				return {
+					type: 'superchat',
+					id: renderer.id,
+					message: parseYTString(renderer.message),
+					author: {
+						id: renderer.authorExternalChannelId,
+						name: parseYTString(renderer.authorName),
+					},
+					amount: {
+						// cents: renderer.purchaseAmountMicros / 1000000,
+						text: parseYTString(renderer.purchaseAmountText),
+					},
+					unix: parseUnix(renderer.timestampUsec),
+				};
+			}
+			// default: {
+			// 	console.log(rendererType, action[rendererType]);
+			// 	return;
+			// }
 		}
 	}
 }

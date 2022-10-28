@@ -140,14 +140,15 @@ export class YoutubeChat implements DurableObject {
 			}
 			const data = await res.json<LiveChatResponse>();
 			const nextContinuation =
-				data?.continuationContents?.liveChatContinuation?.continuations?.[0];
+				data.continuationContents?.liveChatContinuation.continuations?.[0];
 			nextToken =
 				(nextContinuation
 					? getContinuationToken(nextContinuation)
 					: undefined) ?? continuationToken;
 
+			// if data.continuationContents is undefined the stream is probably over
 			const actions =
-				data.continuationContents.liveChatContinuation.actions ?? [];
+				data.continuationContents?.liveChatContinuation.actions ?? [];
 
 			for (const action of actions) {
 				this.broadcast(action);
