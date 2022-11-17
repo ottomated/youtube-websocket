@@ -70,7 +70,8 @@ export function getContinuationToken(continuation: Continuation) {
 	return continuation[key]?.continuation;
 }
 
-export function parseYTString(string: YTString): string {
+export function parseYTString(string?: YTString): string {
+	if (!string) return '';
 	if (string.simpleText) return string.simpleText;
 	if (string.runs)
 		return string.runs

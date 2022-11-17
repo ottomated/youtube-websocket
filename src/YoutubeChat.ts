@@ -1,6 +1,11 @@
 import { IHTTPMethods, Router } from 'itty-router';
 import { Env } from '.';
-import { Continuation, LiveChatAction, LiveChatResponse } from '@util/types';
+import {
+	ChatItemRenderer,
+	Continuation,
+	LiveChatAction,
+	LiveChatResponse,
+} from '@util/types';
 import { traverseJSON } from '@util/util';
 import { getContinuationToken, VideoData } from '@util/youtube';
 import { MessageAdapter } from './adapters';
@@ -151,6 +156,11 @@ export class YoutubeChat implements DurableObject {
 				data.continuationContents?.liveChatContinuation.actions ?? [];
 
 			for (const action of actions) {
+				const id = this.getId(action);
+				if (id) {
+					if (this.seenMessages.has(id)) continue;
+					this.seenMessages.set(id, Date.now());
+				}
 				this.broadcast(action);
 
 				// const parsed = parseChatAction(action);
@@ -167,6 +177,15 @@ export class YoutubeChat implements DurableObject {
 			if (this.adapters.size > 0)
 				setTimeout(() => this.fetchChat(nextToken), chatInterval);
 		}
+	}
+
+	private getId(data: LiveChatAction) {
+		const actionType = Object.keys(data)[0] as keyof LiveChatAction;
+		const action = data[actionType]?.item;
+		if (!action) return;
+		const rendererType = Object.keys(action)[0] as keyof ChatItemRenderer;
+		const renderer = action[rendererType] as any;
+		return renderer.id;
 	}
 
 	private adapters = new Map<string, MessageAdapter>();

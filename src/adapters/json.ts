@@ -86,7 +86,6 @@ export class JSONMessageAdapter extends MessageAdapter {
 			}
 			case 'liveChatMembershipItemRenderer': {
 				const renderer = action[rendererType];
-				console.log(JSON.stringify(renderer, null, 2));
 				return {
 					type: 'member',
 					id: renderer.id,
