@@ -180,6 +180,7 @@ export class YoutubeChat implements DurableObject {
 	}
 
 	private getId(data: LiveChatAction) {
+		delete data.clickTrackingParams;
 		const actionType = Object.keys(data)[0] as keyof LiveChatAction;
 		const action = data[actionType]?.item;
 		if (!action) return;
