@@ -13,6 +13,7 @@ import { JSONMessageAdapter } from './adapters/json';
 import { IRCMessageAdapter } from './adapters/irc';
 import { RawMessageAdapter } from './adapters/raw';
 import { TruffleMessageAdapter } from './adapters/truffle';
+import { SubathonMessageAdapter } from './adapters/subathon';
 
 const adapterMap: Record<
 	string,
@@ -21,6 +22,7 @@ const adapterMap: Record<
 	json: () => new JSONMessageAdapter(),
 	irc: () => new IRCMessageAdapter(),
 	truffle: (env, channelId) => new TruffleMessageAdapter(env, channelId),
+	subathon: () => new SubathonMessageAdapter(),
 	raw: () => new RawMessageAdapter(),
 };
 
@@ -185,7 +187,7 @@ export class YoutubeChat implements DurableObject {
 		const action = data[actionType]?.item;
 		if (!action) return;
 		const rendererType = Object.keys(action)[0] as keyof ChatItemRenderer;
-		const renderer = action[rendererType] as any;
+		const renderer = action[rendererType] as { id: string };
 		return renderer.id;
 	}
 
