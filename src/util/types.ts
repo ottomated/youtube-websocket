@@ -121,7 +121,14 @@ export type ChatItemRenderer = {
 	liveChatPlaceholderItemRenderer: unknown;
 	liveChatPurchasedProductMessageRenderer: unknown;
 	liveChatSponsorshipsGiftPurchaseAnnouncementRenderer: unknown;
-	liveChatSponsorshipsGiftRedemptionAnnouncementRenderer: unknown;
+	liveChatSponsorshipsGiftRedemptionAnnouncementRenderer: {
+		id: string;
+		timestampUsec: string;
+		authorExternalChannelId: string;
+		authorName: YTString;
+		authorPhoto: YTImage;
+		message: YTString;
+	};
 	liveChatViewerEngagementMessageRenderer: unknown;
 	liveChatTickerPaidStickerItemRenderer: unknown;
 };

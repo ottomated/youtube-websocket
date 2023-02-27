@@ -1,8 +1,8 @@
 import { WebSocket } from 'ws';
-// import { appendFile } from 'fs/promises';
+import { appendFile } from 'fs/promises';
 
 const ws = new WebSocket(
-	'wss://youtube-websocket.mogul-moves.workers.dev/c/jaiden?adapter=subathon'
+	'wss://youtube-websocket.mogul-moves.workers.dev/v/tJC0YAOKZxc?adapter=raw'
 );
 
 ws.addEventListener('error', (ev) => {
@@ -16,5 +16,5 @@ ws.addEventListener('open', () => {
 ws.on('message', async (msg) => {
 	const json = JSON.parse(msg.toString());
 	console.log(json);
-	// await appendFile('./debug.out', msg.toString() + ',\n');
+	await appendFile('./debug.out', msg.toString() + ',\n');
 });

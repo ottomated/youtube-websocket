@@ -25,6 +25,16 @@ export type ChatEvent =
 				id: string;
 			};
 			unix: number;
+	  }
+	| {
+			type: 'membergift';
+			id: string;
+			recipient: {
+				id: string;
+				name: string;
+			};
+			gifter: string;
+			unix: number;
 	  };
 
 function parseUnix(unix: string): number {
@@ -72,6 +82,25 @@ export class SubathonMessageAdapter extends MessageAdapter {
 						// cents: renderer.purchaseAmountMicros / 1000000,
 						text: parseYTString(renderer.purchaseAmountText),
 					},
+					unix: parseUnix(renderer.timestampUsec),
+				};
+			}
+			case 'liveChatSponsorshipsGiftRedemptionAnnouncementRenderer': {
+				const renderer = action[rendererType];
+				const messageRuns = renderer.message.runs;
+				let gifter = 'Unknown';
+				// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+				if (messageRuns?.length === 2 && 'text' in messageRuns[1]!) {
+					gifter = messageRuns[1].text;
+				}
+				return {
+					type: 'membergift',
+					id: renderer.id,
+					recipient: {
+						id: renderer.authorExternalChannelId,
+						name: parseYTString(renderer.authorName),
+					},
+					gifter,
 					unix: parseUnix(renderer.timestampUsec),
 				};
 			}
