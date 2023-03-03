@@ -33,6 +33,9 @@ export const getChannel: Handler<{ id: string }> = async (request, env) => {
 };
 
 function getChannelLiveUrl(channelId: string) {
+	if (channelId.startsWith('@')) {
+		return [`https://www.youtube.com/${channelId}/live`];
+	}
 	const isId = /^UC.{22}$/.test(channelId);
 	let urlParts: string[];
 	if (isId) urlParts = ['channel', 'c', 'user'];
